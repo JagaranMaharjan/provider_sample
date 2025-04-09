@@ -9,7 +9,7 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<CartProvider>(context);
-    final items = cart.items;
+    final items = cart.items.values.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -17,22 +17,48 @@ class CartScreen extends StatelessWidget {
       ),
       body: items.isEmpty
           ? const Center(child: Text('Your cart is empty.'))
-          : ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (ctx, i) {
-          final Product product = items[i];
-          return ListTile(
-            leading: Image.network(product.thumbnail, width: 60, fit: BoxFit.cover),
-            title: Text(product.title),
-            subtitle: Text('\$${product.price}'),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
-              onPressed: () {
-                cart.removeFromCart(product);
+          : Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (ctx, i) {
+                final cartItem = items[i];
+                final product = cartItem.product;
+                return ListTile(
+                  leading: Image.network(product.thumbnail, width: 60, fit: BoxFit.cover),
+                  title: Text(product.title),
+                  subtitle: Text('\$${product.price} x ${cartItem.quantity}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline),
+                        onPressed: () => cart.decreaseQuantity(product),
+                      ),
+                      Text('${cartItem.quantity}'),
+                      IconButton(
+                        icon: const Icon(Icons.add_circle_outline),
+                        onPressed: () => cart.increaseQuantity(product),
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
-          );
-        },
+          ),
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Total:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text('\$${cart.totalPrice.toStringAsFixed(2)}',
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

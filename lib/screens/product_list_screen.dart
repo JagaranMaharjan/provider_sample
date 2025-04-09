@@ -77,11 +77,28 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     title: Text(product.title),
                     subtitle: Text(product.description,
                         maxLines: 2, overflow: TextOverflow.ellipsis),
-                    trailing: ElevatedButton(
-                      onPressed: () {
-                        cart.addToCart(product);
+                    trailing: Consumer<CartProvider>(
+                      builder: (context, cart, child) {
+                        final isInCart = cart.isInCart(product);
+                        return ElevatedButton(
+                          onPressed: () {
+                            if (isInCart) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                    builder: (_) => const CartScreen()),
+                              );
+                            } else {
+                              cart.addToCart(product);
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isInCart
+                                ? Colors.grey
+                                : null,
+                          ),
+                          child: Text(isInCart ? 'View Cart' : 'Add to Cart'),
+                        );
                       },
-                      child: const Text("Add to Cart"),
                     ),
                   ),
                 );
