@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:provider_sample/screens/product_detail_screen.dart';
 import '../providers/cart_summary_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
@@ -99,6 +100,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 return Card(
                   margin: const EdgeInsets.all(8),
                   child: ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ProductDetailScreen(productId: product.id),
+                        ),
+                      );
+                    },
                     leading: Image.network(product.thumbnail,
                         width: 60, fit: BoxFit.cover),
                     title: Text(product.title),
