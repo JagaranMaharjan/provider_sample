@@ -31,36 +31,43 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     final products = Provider.of<ProductProvider>(context).products;
-    final cart = Provider.of<CartProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
         actions: [
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.shopping_cart),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const CartScreen()),
-                  );
-                },
-              ),
-              Positioned(
-                right: 6,
-                top: 6,
-                child: CircleAvatar(
-                  radius: 10,
-                  backgroundColor: Colors.red,
-                  child: Text(
-                    '${cart.itemCount}',
-                    style: const TextStyle(fontSize: 12, color: Colors.white),
+          Selector<CartProvider, int>(
+            selector: (context, cart) => cart.itemCount,
+            builder: (context, itemCount, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const CartScreen()),
+                      );
+                    },
                   ),
-                ),
-              )
-            ],
-          )
+                  if (itemCount > 0)
+                    Positioned(
+                      right: 6,
+                      top: 6,
+                      child: CircleAvatar(
+                        radius: 10,
+                        backgroundColor: Colors.red,
+                        child: Text(
+                          itemCount.toString(),
+                          style: const TextStyle(
+                              fontSize: 12, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
         ],
       ),
       body: _isLoading
@@ -77,9 +84,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
                     title: Text(product.title),
                     subtitle: Text(product.description,
                         maxLines: 2, overflow: TextOverflow.ellipsis),
-                    trailing: Consumer<CartProvider>(
-                      builder: (context, cart, child) {
-                        final isInCart = cart.isInCart(product);
+                    trailing: Selector<CartProvider, bool>(
+                      selector: (context, cartProvider) =>
+                          cartProvider.isInCart(product),
+                      builder: (context, isInCart, child) {
                         return ElevatedButton(
                           onPressed: () {
                             if (isInCart) {
@@ -88,7 +96,8 @@ class _ProductListScreenState extends State<ProductListScreen> {
                                     builder: (_) => const CartScreen()),
                               );
                             } else {
-                              cart.addToCart(product);
+                              Provider.of<CartProvider>(context, listen: false)
+                                  .addToCart(product);
                             }
                           },
                           style: ElevatedButton.styleFrom(
