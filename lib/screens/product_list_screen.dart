@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/cart_summary_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
 import '../models/product.dart';
@@ -31,6 +32,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     final products = Provider.of<ProductProvider>(context).products;
+    final summary = Provider.of<CartSummaryProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -69,6 +71,24 @@ class _ProductListScreenState extends State<ProductListScreen> {
             },
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text(
+                  '🛒 Total Items: ${summary.totalItems}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  '💰 Total Price: \$${summary.totalPrice.toStringAsFixed(2)}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -101,9 +121,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isInCart
-                                ? Colors.grey
-                                : null,
+                            backgroundColor: isInCart ? Colors.grey : null,
                           ),
                           child: Text(isInCart ? 'View Cart' : 'Add to Cart'),
                         );
